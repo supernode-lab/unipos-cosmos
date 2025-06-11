@@ -1,0 +1,14 @@
+[config]
+default_to_workspace = false
+
+[tasks.default]
+alias = "build-all"
+
+[env]
+FEATURES = { value = "default", condition = { env_not_set = ["FEATURES"] } }
+
+[tasks.build-all]
+script = [
+    "cargo wasm --manifest-path contracts/sharecore/Cargo.toml --features ${FEATURES}",
+    "cargo wasm --manifest-path contracts/stakecore/Cargo.toml --features ${FEATURES}",
+]

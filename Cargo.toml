@@ -1,0 +1,28 @@
+[workspace]
+members = ["contracts/*", "packages/*"]
+resolver = "2"
+
+
+[workspace.dependencies]
+cosmwasm-schema = "2.2.0"
+cosmwasm-std = { version = "2.2.0" }
+cw-storage-plus = { version = "2.0.0", default-features = false, features = ["iterator"] }
+schemars = "0.8.16"
+serde = { version = "1.0.197", default-features = false, features = ["derive"] }
+thiserror = { version = "1.0.58" }
+cw20 = { version = "2.0.0", package = "cw20" }
+bh-storage = { path = "packages/bh-storage" }
+unipos = { path = "packages/unipos" }
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'abort'
+incremental = false
+overflow-checks = true
+
+
