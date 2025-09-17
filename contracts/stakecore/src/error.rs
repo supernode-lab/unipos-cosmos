@@ -1,10 +1,15 @@
+use access_control::AccessControlError;
 use cosmwasm_std::StdError;
 use thiserror::Error;
+use universal_token::UniversalTokenError;
 
 #[derive(Error, Debug)]
 pub enum ContractError {
     #[error("{0}")]
     Std(#[from] StdError),
+
+    #[error("forbid")]
+    Forbidden,
 
     #[error("Unauthorized")]
     Unauthorized,
@@ -24,6 +29,12 @@ pub enum ContractError {
     #[error("Invalid input")]
     InvalidInput,
 
-    #[error("No locked funds")]
-    NoLockedFunds,
+    #[error("{0}")]
+    UniversalTokenError(#[from] UniversalTokenError),
+
+    #[error("No excessive tokens")]
+    NoExcessTokens,
+
+    #[error("{0}")]
+    AccessControl(#[from] AccessControlError),
 }

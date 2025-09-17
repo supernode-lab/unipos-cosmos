@@ -1,5 +1,5 @@
 [package]
-name = "bh-storage"
+name = "universal-token"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,7 +14,7 @@ serde = { workspace = true }
 cosmwasm-std = { workspace = true }
 thiserror = { workspace = true }
 cw-storage-plus = { workspace = true }
-
+cw20 = { workspace = true }
 
 [features]
 # use library feature to disable all instantiate/execute/query exports

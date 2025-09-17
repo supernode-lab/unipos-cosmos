@@ -29,8 +29,11 @@ where
 
     pub fn push(&self, store: &mut dyn Storage, item: &T) -> StdResult<()> {
         let len = self.len(store)?;
+        let new_len = len
+            .checked_add(1)
+            .ok_or_else(|| StdError::generic_err("Vector overflow"))?;
         self.as_map().save(store, len, item)?;
-        self.set_len(store, len + 1);
+        self.set_len(store, new_len);
         Ok(())
     }
 

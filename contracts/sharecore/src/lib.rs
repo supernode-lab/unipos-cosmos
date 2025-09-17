@@ -1,7 +1,5 @@
-pub mod contract;
-mod error;
-pub mod msg;
 pub mod state;
-mod query;
-
-pub use crate::error::ContractError;
+mod types;
+mod msg;
+mod error;
+pub mod contract;

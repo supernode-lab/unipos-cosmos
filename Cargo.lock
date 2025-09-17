@@ -3,6 +3,18 @@
 version = 4
 
 [[package]]
+name = "access-control"
+version = "0.1.0"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-storage-plus",
+ "cw20",
+ "serde",
+ "thiserror 2.0.16",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -172,9 +184,8 @@ dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-storage-plus",
- "schemars",
  "serde",
- "thiserror",
+ "thiserror 2.0.16",
 ]
 
 [[package]]
@@ -237,7 +248,7 @@ dependencies = [
  "rand_core",
  "rayon",
  "sha2",
- "thiserror",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -261,7 +272,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -296,7 +307,7 @@ dependencies = [
  "serde-json-wasm",
  "sha2",
  "static_assertions",
- "thiserror",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -403,7 +414,7 @@ dependencies = [
  "cosmwasm-std",
  "schemars",
  "serde",
- "thiserror",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -956,15 +967,14 @@ dependencies = [
 name = "sharecore"
 version = "0.1.0"
 dependencies = [
- "bh-storage",
+ "access-control",
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-storage-plus",
- "cw20",
- "schemars",
  "serde",
- "thiserror",
- "unipos",
+ "stakecore",
+ "thiserror 2.0.16",
+ "universal-token",
 ]
 
 [[package]]
@@ -981,15 +991,14 @@ dependencies = [
 name = "stakecore"
 version = "0.1.0"
 dependencies = [
+ "access-control",
  "bh-storage",
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-storage-plus",
- "cw20",
- "schemars",
  "serde",
- "thiserror",
- "unipos",
+ "thiserror 2.0.16",
+ "universal-token",
 ]
 
 [[package]]
@@ -1032,7 +1041,16 @@ version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
 dependencies = [
- "thiserror-impl",
+ "thiserror-impl 1.0.69",
+]
+
+[[package]]
+name = "thiserror"
+version = "2.0.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3467d614147380f2e4e374161426ff399c91084acd2363eaf549172b3d5e60c0"
+dependencies = [
+ "thiserror-impl 2.0.16",
 ]
 
 [[package]]
@@ -1040,6 +1058,17 @@ name = "thiserror-impl"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.101",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "2.0.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c5e1be1c48b9172ee610da68fd9cd2770e7a4056cb3fc98710ee6906f0c7960"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1065,13 +1094,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 
 [[package]]
-name = "unipos"
+name = "universal-token"
 version = "0.1.0"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
- "schemars",
+ "cw-storage-plus",
+ "cw20",
  "serde",
+ "thiserror 2.0.16",
 ]
 
 [[package]]
