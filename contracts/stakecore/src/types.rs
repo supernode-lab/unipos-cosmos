@@ -25,7 +25,7 @@ impl Config {
         .unwrap()
     }
 
-    pub fn calc_unlocked_installment_reward(&self, env: &Env, stake_info: &StakeInfo) -> Uint128 {
+    pub fn calc_unlocked_installment_rewards(&self, env: &Env, stake_info: &StakeInfo) -> Uint128 {
         let now = Uint64::from(env.block.time.seconds());
         let elapsed_t = if now <= stake_info.start_time {
             Uint64::zero()
@@ -58,13 +58,13 @@ impl Config {
         Uint128::zero()
     }
 
-    pub fn calc_withdrawable_reward(&self, env: &Env, stake_info: &StakeInfo) -> Uint128 {
-        let unlocked_reward = self.calc_unlocked_installment_reward(env, stake_info);
-        if unlocked_reward <= stake_info.withdrawn_rewards {
+    pub fn calc_withdrawable_rewards(&self, env: &Env, stake_info: &StakeInfo) -> Uint128 {
+        let unlocked_rewards = self.calc_unlocked_installment_rewards(env, stake_info);
+        if unlocked_rewards <= stake_info.withdrawn_rewards {
             return Uint128::zero();
         }
 
-        unlocked_reward - stake_info.withdrawn_rewards
+        unlocked_rewards - stake_info.withdrawn_rewards
     }
 
     pub fn calc_withdrawable_principal(&self, env: &Env, stake_info: &StakeInfo) -> Uint128 {

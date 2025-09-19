@@ -3,6 +3,7 @@ use crate::state::ac::get_access_control;
 use crate::state::ut::get_univeral_token;
 use crate::state::{
     Config, ShareInfo, ShareholderInfo, CONFIG, HELD_FUNDS, SHAREHOLDER_INFOS, SHARE_INFOS,
+    SHARE_INFO_INDEXES,
 };
 use cosmwasm_std::{entry_point, to_json_binary, Binary, Deps, Env, Order, StdResult};
 use universal_token::TokenConfig;
@@ -13,8 +14,8 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Config => to_json_binary(&query_config(deps)?),
         QueryMsg::ShareInfo { share_id } => to_json_binary(&query_share_info(deps, share_id)?),
         QueryMsg::ShareInfos => to_json_binary(&query_share_infos(deps)?),
-        QueryMsg::Shareholder { share_id, addr } => {
-            to_json_binary(&query_shareholder(deps, share_id, addr)?)
+        QueryMsg::Shareholder { share_id, account } => {
+            to_json_binary(&query_shareholder(deps, share_id, account)?)
         }
         QueryMsg::Shareholders => to_json_binary(&query_shareholders(deps)?),
         QueryMsg::Token => to_json_binary(&query_token(deps)?),
@@ -37,26 +38,22 @@ fn query_share_info(deps: Deps, share_id: u32) -> StdResult<ShareInfo> {
     SHARE_INFOS.load(deps.storage, share_id)
 }
 
-fn query_shareholder(deps: Deps, share_id: u32, addr: String) -> StdResult<ShareholderInfo> {
-    let holder_addr = deps.api.addr_validate(&addr)?;
-    SHAREHOLDER_INFOS.load(deps.storage, (&holder_addr, share_id))
+fn query_shareholder(deps: Deps, share_id: u32, account: String) -> StdResult<ShareholderInfo> {
+    let account_addr = deps.api.addr_validate(&account)?;
+    SHAREHOLDER_INFOS.load(deps.storage, (&account_addr, share_id))
 }
 
 fn query_share_infos(deps: Deps) -> StdResult<ShareInfosResponse> {
-    let mut share_ids = Vec::new();
-    for res in SHARE_INFOS.range(deps.storage, None, None, Order::Ascending) {
-        let (share_id, _) = res?;
-        share_ids.push(share_id);
-    }
-
-    Ok(ShareInfosResponse { share_ids })
+    Ok(ShareInfosResponse {
+        share_ids: SHARE_INFO_INDEXES.load(deps.storage)?,
+    })
 }
 
 fn query_shareholders(deps: Deps) -> StdResult<HoldersResponse> {
     let mut shareholders = Vec::new();
     for res in SHAREHOLDER_INFOS.range(deps.storage, None, None, Order::Ascending) {
-        let ((addr, share_id), _) = res?;
-        shareholders.push((addr, share_id));
+        let ((account, share_id), _) = res?;
+        shareholders.push((account, share_id));
     }
 
     Ok(HoldersResponse {

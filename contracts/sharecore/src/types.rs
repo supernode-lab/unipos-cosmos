@@ -7,7 +7,6 @@ pub struct Config {
     pub enable_shareholder_whitelist: bool,
 }
 
-// Invariants: granted_reward ≤ total_reward, granted_principal ≤ principal
 #[cw_serde]
 pub struct ShareInfo {
     pub start_time: Uint64,
@@ -80,9 +79,9 @@ impl ShareInfo {
         &self,
         shareholder_info: &ShareholderInfo,
     ) -> Uint128 {
-        let unlocked_reward = self.calc_shareholder_unlocked_rewards(shareholder_info);
-        if unlocked_reward > shareholder_info.withdrawn_rewards {
-            unlocked_reward - shareholder_info.withdrawn_rewards
+        let unlocked_rewards = self.calc_shareholder_unlocked_rewards(shareholder_info);
+        if unlocked_rewards > shareholder_info.withdrawn_rewards {
+            unlocked_rewards - shareholder_info.withdrawn_rewards
         } else {
             Uint128::zero()
         }

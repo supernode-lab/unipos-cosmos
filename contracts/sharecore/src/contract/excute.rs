@@ -38,7 +38,7 @@ pub fn execute(
         ExecuteMsg::AddShareholder {
             owner,
             share_id,
-            granted_reward,
+            granted_rewards: granted_rewards,
             granted_principal,
         } => execute_add_shareholder(
             deps,
@@ -46,7 +46,7 @@ pub fn execute(
             info,
             owner,
             share_id,
-            granted_reward,
+            granted_rewards,
             granted_principal,
         ),
 
@@ -54,7 +54,7 @@ pub fn execute(
             owner,
             share_id,
             start_time,
-            granted_reward,
+            granted_rewards,
             granted_principal,
         } => execute_add_shareholder_with_time(
             deps,
@@ -63,7 +63,7 @@ pub fn execute(
             owner,
             share_id,
             start_time,
-            granted_reward,
+            granted_rewards,
             granted_principal,
         ),
         ExecuteMsg::WithdrawRewards { share_id } => {
@@ -79,7 +79,7 @@ pub fn execute(
             token,
         } => execute_collect(deps, env, info, is_native_token, token),
 
-        ExecuteMsg::ClaimStakeReward { share_id } => {
+        ExecuteMsg::ClaimStakeRewards { share_id } => {
             execute_claim_stake_rewards(deps, env, info, share_id)
         }
         ExecuteMsg::ClaimStakeRewardsBatch => execute_claim_stake_rewards_batch(deps, env, info),
@@ -145,8 +145,8 @@ fn execute_accrue_rewards(
         });
     }
 
-    let recyclable_reward = share_info.recyclable_rewards(recycled_time);
-    share_info.total_recycled_rewards += recyclable_reward;
+    let recyclable_rewards = share_info.recyclable_rewards(recycled_time);
+    share_info.total_recycled_rewards += recyclable_rewards;
     share_info.recycled_time = recycled_time;
     SHARE_INFOS.save(deps.storage, share_id, &share_info)?;
 
@@ -154,7 +154,7 @@ fn execute_accrue_rewards(
         .add_attribute("action", "accure_rewards")
         .add_attribute("share_id", share_id.to_string())
         .add_attribute("recycled_time", recycled_time.to_string())
-        .add_attribute("recycled_reward", recyclable_reward.to_string()))
+        .add_attribute("recycled_rewards", recyclable_rewards.to_string()))
 }
 
 fn execute_recycle(
@@ -172,9 +172,9 @@ fn execute_recycle(
         ContractError::AmountExceedsWithdrawable
     );
 
-    let withdrawable_reward = share_info.rewards_balance();
+    let withdrawable_rewards = share_info.rewards_balance();
     ensure!(
-        amount <= withdrawable_reward,
+        amount <= withdrawable_rewards,
         ContractError::AmountExceedsBalance
     );
 
@@ -198,7 +198,7 @@ fn execute_add_shareholder(
     info: MessageInfo,
     owner: String,
     share_id: u32,
-    granted_reward: Uint128,
+    granted_rewards: Uint128,
     granted_principal: Uint128,
 ) -> Result<Response, ContractError> {
     let share_info = SHARE_INFOS.load(deps.storage, share_id)?;
@@ -209,7 +209,7 @@ fn execute_add_shareholder(
         owner,
         share_id,
         share_info.recycled_time,
-        granted_reward,
+        granted_rewards,
         granted_principal,
     )
 }
@@ -489,7 +489,7 @@ fn execute_register_new_share(
         deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
             contract_addr: config.stakecore.as_ref().unwrap().to_string(),
             msg: to_json_binary(&StakecoreQueryMsg::StakerIndexes {
-                staker: env.contract.address.to_string(),
+                account: env.contract.address.to_string(),
             })?,
         }))?;
 

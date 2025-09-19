@@ -242,7 +242,7 @@ fn execute_withdraw_rewards(
     }
 
     let config = CONFIG.load(deps.storage)?;
-    let withdrawable_rewards = config.calc_withdrawable_reward(&env, &stake_info);
+    let withdrawable_rewards = config.calc_withdrawable_rewards(&env, &stake_info);
     if withdrawable_rewards == Uint128::zero() {
         return Ok(Response::default()
             .add_attribute("action", "withdraw_rewards")
@@ -277,14 +277,14 @@ fn execute_claim_rewards_batch(
     let config = CONFIG.load(deps.storage)?;
 
     let mut amounts = Vec::new();
-    let mut total_withdrawable_reward = Uint128::zero();
+    let mut total_withdrawable_rewards = Uint128::zero();
     for index in &indexes {
         let mut stake_info = STAKE_RECORDS.get(deps.storage, *index)?;
         if stake_info.owner != info.sender {
             return Err(ContractError::Unauthorized);
         }
 
-        let withdrawble_reward = config.calc_withdrawable_reward(&env, &stake_info);
+        let withdrawble_reward = config.calc_withdrawable_rewards(&env, &stake_info);
         amounts.push(withdrawble_reward);
 
         if withdrawble_reward == Uint128::zero() {
@@ -293,31 +293,31 @@ fn execute_claim_rewards_batch(
 
         stake_info.withdrawn_rewards += withdrawble_reward;
         STAKE_RECORDS.set(deps.storage, *index, &stake_info)?;
-        total_withdrawable_reward += withdrawble_reward;
+        total_withdrawable_rewards += withdrawble_reward;
     }
 
-    if total_withdrawable_reward == Uint128::zero() {
+    if total_withdrawable_rewards == Uint128::zero() {
         return Ok(Response::default()
             .add_attribute("action", "withdraw_rewards_batch")
             .add_attribute("owner", info.sender)
-            .add_attribute("total_amount", total_withdrawable_reward)
+            .add_attribute("total_amount", total_withdrawable_rewards)
             .add_attribute("amounts", to_json_string(&amounts)?)
             .add_attribute("indexes", to_json_string(&indexes)?));
     }
 
     ASSET_INFO.update(deps.storage, |mut info| -> StdResult<_> {
-        info.withdrawn_rewards += total_withdrawable_reward;
+        info.withdrawn_rewards += total_withdrawable_rewards;
         Ok(info)
     })?;
 
     let msgs =
-        get_univeral_token(deps.storage)?.send_token(&info.sender, total_withdrawable_reward)?;
+        get_univeral_token(deps.storage)?.send_token(&info.sender, total_withdrawable_rewards)?;
 
     Ok(Response::new()
         .add_messages(msgs)
         .add_attribute("action", "withdraw_rewards_batch")
         .add_attribute("owner", info.sender)
-        .add_attribute("total_amount", total_withdrawable_reward)
+        .add_attribute("total_amount", total_withdrawable_rewards)
         .add_attribute("amounts", to_json_string(&amounts)?)
         .add_attribute("indexes", to_json_string(&indexes)?))
 }

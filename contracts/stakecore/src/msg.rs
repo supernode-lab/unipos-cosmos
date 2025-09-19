@@ -67,7 +67,7 @@ pub enum QueryMsg {
     StakeInfo { index: u32 },
 
     #[returns(StakerIndexesResponse)]
-    StakerIndexes { staker: String },
+    StakerIndexes { account: String },
 
     #[returns(TokenConfig)]
     Token,

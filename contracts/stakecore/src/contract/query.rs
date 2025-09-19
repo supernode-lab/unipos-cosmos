@@ -13,7 +13,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Config=> to_json_binary(&query_config(deps)?),
         QueryMsg::AssetInfo => to_json_binary(&query_asset_info(deps)?),
         QueryMsg::StakeInfo { index } => to_json_binary(&query_stake_info(deps, index)?),
-        QueryMsg::StakerIndexes { staker } => to_json_binary(&query_staker_indexes(deps, staker)?),
+        QueryMsg::StakerIndexes { account: staker } => to_json_binary(&query_staker_indexes(deps, staker)?),
         QueryMsg::Token => to_json_binary(&query_token(deps)?),
         QueryMsg::HaveRole { role, account } => {
             to_json_binary(&query_have_role(deps, role, account)?)

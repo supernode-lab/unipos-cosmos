@@ -19,10 +19,10 @@ impl AccessControl {
         storage: &mut dyn Storage,
         admin: &Addr,
         role: &str,
-        addr: &Addr,
+        account: &Addr,
     ) -> Result<(), AccessControlError> {
         self.check_is_admin(storage, role, admin)?;
-        self._grant_role(storage, role, addr)?;
+        self._grant_role(storage, role, account)?;
         Ok(())
     }
 
@@ -31,10 +31,10 @@ impl AccessControl {
         storage: &mut dyn Storage,
         admin: &Addr,
         role: &str,
-        addr: &Addr,
+        account: &Addr,
     ) -> Result<(), AccessControlError> {
         self.check_is_admin(storage, role, admin)?;
-        self._revoke_role(storage, role, addr);
+        self._revoke_role(storage, role, account);
         Ok(())
     }
 

@@ -32,7 +32,7 @@ pub enum ExecuteMsg {
     AddShareholder {
         owner: String,
         share_id: u32,
-        granted_reward: Uint128,
+        granted_rewards: Uint128,
         granted_principal: Uint128,
     },
 
@@ -40,7 +40,7 @@ pub enum ExecuteMsg {
         owner: String,
         share_id: u32,
         start_time: Uint64,
-        granted_reward: Uint128,
+        granted_rewards: Uint128,
         granted_principal: Uint128,
     },
 
@@ -56,7 +56,7 @@ pub enum ExecuteMsg {
 
     ClaimStakeRewardsBatch,
 
-    ClaimStakeReward {
+    ClaimStakeRewards {
         share_id: u32,
     },
 
@@ -84,11 +84,11 @@ pub enum QueryMsg {
     #[returns(ShareInfo)]
     ShareInfo { share_id: u32 },
 
-    #[returns(ShareholderInfo)]
-    Shareholder { share_id: u32, addr: String },
-
     #[returns(ShareInfosResponse)]
     ShareInfos,
+
+    #[returns(ShareholderInfo)]
+    Shareholder { share_id: u32, account: String },
 
     #[returns(HoldersResponse)]
     Shareholders,
