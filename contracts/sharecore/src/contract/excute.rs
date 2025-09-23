@@ -38,7 +38,7 @@ pub fn execute(
         ExecuteMsg::AddShareholder {
             owner,
             share_id,
-            granted_rewards: granted_rewards,
+            granted_rewards,
             granted_principal,
         } => execute_add_shareholder(
             deps,
@@ -315,6 +315,7 @@ fn _add_shareholder(
     share_info.granted_rewards += granted_rewards;
     share_info.granted_principal += granted_principal;
     share_info.total_recycled_rewards += unrecycled_rewards;
+    SHARE_INFOS.save(deps.storage, share_id, &share_info)?;
 
     let shareholder_info = if let Some(mut shareholder_info) =
         SHAREHOLDER_INFOS.may_load(deps.storage, (&owner_addr, share_id))?
