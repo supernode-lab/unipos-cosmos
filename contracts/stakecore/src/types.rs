@@ -33,17 +33,23 @@ impl Config {
             now - stake_info.start_time
         };
 
-        if elapsed_t >= self.lock_period {
+        if elapsed_t < self.cliff_period {
+            Uint128::zero()
+        } else if elapsed_t >= self.lock_period {
             stake_info.total_rewards
         } else {
-            stake_info.total_rewards
-                * (Uint128::from(elapsed_t) * self.installment_num
-                    / Uint128::from(self.lock_period))
-                / self.installment_num
+            let vest_window = Uint128::from(self.lock_period - self.cliff_period);
+            let vested_time = Uint128::from(elapsed_t - self.cliff_period);
+            let unlocked_phase = vested_time * self.installment_num / vest_window;
+            stake_info.total_rewards / self.installment_num * unlocked_phase
         }
     }
 
-    pub fn calc_unlocked_installment_principal(&self, env: &Env, stake_info: &StakeInfo) -> Uint128 {
+    pub fn calc_unlocked_installment_principal(
+        &self,
+        env: &Env,
+        stake_info: &StakeInfo,
+    ) -> Uint128 {
         let now = Uint64::from(env.block.time.seconds());
         let elapsed_t = if now <= stake_info.start_time {
             Uint64::zero()

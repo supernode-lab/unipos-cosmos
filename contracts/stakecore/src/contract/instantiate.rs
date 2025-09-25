@@ -2,9 +2,10 @@ use crate::msg::InstantiateMsg;
 use crate::state::ac::{get_access_control, PROVIDER_ROLE};
 use crate::state::ut::TOKEN_CONFIG;
 use crate::state::{AssetInfo, Config, ASSET_INFO, CONFIG};
+use crate::types::PRECISION;
 use crate::ContractError;
 use access_control::DEFAULT_ADMIN_ROLE;
-use cosmwasm_std::{entry_point,DepsMut, Env, MessageInfo, Response, Uint128, Uint64};
+use cosmwasm_std::{entry_point, DepsMut, Env, MessageInfo, Response, Uint128, Uint64};
 use universal_token::TokenConfig;
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -27,10 +28,14 @@ pub fn instantiate(
         return Err(ContractError::InvalidInput);
     }
 
+    if msg.cliff_period > msg.lock_period {
+        return Err(ContractError::InvalidInput);
+    }
+
     let config = Config {
         lock_period: msg.lock_period,
         cliff_period: msg.cliff_period,
-        apy: msg.apy,
+        apy: (msg.apy * Uint128::from(PRECISION / 100)),
         installment_num: msg.installment_num,
         min_stake_amount: msg.min_stake_amount,
         enable_staker_whitelist: msg.enable_staker_whitelist,
