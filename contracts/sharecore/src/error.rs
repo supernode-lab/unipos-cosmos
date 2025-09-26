@@ -23,8 +23,8 @@ pub enum ContractError {
     #[error("AmountExceedsBalance")]
     AmountExceedsBalance,
 
-    #[error("Insufficient reward")]
-    InsufficientReward,
+    #[error("Insufficient rewards")]
+    InsufficientRewards,
 
     #[error("Insufficient principal")]
     InsufficientPrincipal,

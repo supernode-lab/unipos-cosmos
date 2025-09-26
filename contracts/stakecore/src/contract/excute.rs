@@ -284,16 +284,16 @@ fn execute_claim_rewards_batch(
             return Err(ContractError::Unauthorized);
         }
 
-        let withdrawble_reward = config.calc_withdrawable_rewards(&env, &stake_info);
-        amounts.push(withdrawble_reward);
+        let withdrawble_rewards = config.calc_withdrawable_rewards(&env, &stake_info);
+        amounts.push(withdrawble_rewards);
 
-        if withdrawble_reward == Uint128::zero() {
+        if withdrawble_rewards == Uint128::zero() {
             continue;
         }
 
-        stake_info.withdrawn_rewards += withdrawble_reward;
+        stake_info.withdrawn_rewards += withdrawble_rewards;
         STAKE_RECORDS.set(deps.storage, *index, &stake_info)?;
-        total_withdrawable_rewards += withdrawble_reward;
+        total_withdrawable_rewards += withdrawble_rewards;
     }
 
     if total_withdrawable_rewards == Uint128::zero() {

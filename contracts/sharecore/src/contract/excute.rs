@@ -66,6 +66,22 @@ pub fn execute(
             granted_rewards,
             granted_principal,
         ),
+
+        ExecuteMsg::Share {
+            share_id,
+            new_owner,
+            granted_rewards,
+            granted_principal,
+        } => execute_share(
+            deps,
+            env,
+            info,
+            share_id,
+            new_owner,
+            granted_rewards,
+            granted_principal,
+        ),
+
         ExecuteMsg::WithdrawRewards { share_id } => {
             execute_withdraw_rewards(deps, env, info, share_id)
         }
@@ -221,7 +237,7 @@ fn execute_add_shareholder_with_time(
     owner: String,
     share_id: u32,
     start_time: Uint64,
-    granted_reward: Uint128,
+    granted_rewards: Uint128,
     granted_principal: Uint128,
 ) -> Result<Response, ContractError> {
     _add_shareholder(
@@ -231,7 +247,7 @@ fn execute_add_shareholder_with_time(
         owner,
         share_id,
         start_time,
-        granted_reward,
+        granted_rewards,
         granted_principal,
     )
 }
@@ -308,7 +324,7 @@ fn _add_shareholder(
             + share_info.total_recycled_rewards
             <= share_info.total_rewards,
         ContractError::InvalidParamter {
-            key: "granted_reward".to_string()
+            key: "granted_rewards".to_string()
         }
     );
 
@@ -342,10 +358,89 @@ fn _add_shareholder(
         .add_attribute("share_id", share_id.to_string())
         .add_attribute("start_time", start_time.to_string())
         .add_attribute(
-            "need_to_recycle_reward",
+            "need_to_recycle_rewards",
             need_to_recycle_rewards.to_string(),
         )
-        .add_attribute("granted_reward", granted_rewards.to_string())
+        .add_attribute("granted_rewards", granted_rewards.to_string())
+        .add_attribute("granted_principal", granted_principal.to_string()))
+}
+
+fn execute_share(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    share_id: u32,
+    new_owner: String,
+    granted_rewards: Uint128,
+    granted_principal: Uint128,
+) -> Result<Response, ContractError> {
+    let new_owner_addr = deps.api.addr_validate(&new_owner)?;
+    ensure!(
+        granted_rewards + granted_principal > Uint128::zero(),
+        ContractError::InvalidParamter {
+            key: "granted_rewards&granted_principal".to_string()
+        }
+    );
+
+    let access_control = get_access_control();
+    access_control.only_admin(deps.storage, &info.sender)?;
+    let config = CONFIG.load(deps.storage)?;
+    if config.enable_shareholder_whitelist {
+        access_control.only_shareholder(deps.storage, &new_owner_addr)?;
+    }
+
+    let mut shareholder_info = SHAREHOLDER_INFOS.load(deps.storage, (&info.sender, share_id))?;
+    ensure!(
+        granted_rewards + shareholder_info.withdrawn_rewards <= shareholder_info.granted_rewards,
+        ContractError::InsufficientRewards
+    );
+    ensure!(
+        granted_principal + shareholder_info.withdrawn_principal
+            <= shareholder_info.granted_principal,
+        ContractError::InsufficientPrincipal
+    );
+
+    let pre_recycled_rewards: Uint128 = if shareholder_info.granted_rewards == Uint128::zero() {
+        Uint128::zero()
+    } else {
+        granted_rewards * shareholder_info.pre_recycled_rewards / shareholder_info.granted_rewards
+    };
+
+    shareholder_info.granted_rewards -= granted_rewards;
+    shareholder_info.granted_principal -= granted_principal;
+    shareholder_info.pre_recycled_rewards -= pre_recycled_rewards;
+    SHAREHOLDER_INFOS.save(deps.storage, (&info.sender, share_id), &shareholder_info)?;
+
+    let new_shareholder_info = if let Some(mut new_shareholder_info) =
+        SHAREHOLDER_INFOS.may_load(deps.storage, (&new_owner_addr, share_id))?
+    {
+        new_shareholder_info.granted_rewards += granted_rewards;
+        new_shareholder_info.granted_principal += granted_principal;
+        new_shareholder_info.pre_recycled_rewards += pre_recycled_rewards;
+        new_shareholder_info
+    } else {
+        ShareholderInfo {
+            pre_recycled_rewards: pre_recycled_rewards,
+            granted_rewards,
+            withdrawn_rewards: Uint128::zero(),
+            granted_principal: granted_principal,
+            withdrawn_principal: Uint128::zero(),
+        }
+    };
+
+    SHAREHOLDER_INFOS.save(
+        deps.storage,
+        (&new_owner_addr, share_id),
+        &new_shareholder_info,
+    )?;
+
+    Ok(Response::new()
+        .add_attribute("action", "share")
+        .add_attribute("owner", info.sender.to_string())
+        .add_attribute("share_id", share_id.to_string())
+        .add_attribute("new_owner", new_owner)
+        .add_attribute("need_to_recycle_rewards", pre_recycled_rewards.to_string())
+        .add_attribute("granted_rewards", granted_rewards.to_string())
         .add_attribute("granted_principal", granted_principal.to_string()))
 }
 
@@ -579,7 +674,7 @@ fn execute_claim_stake_rewards(
 
     Ok(Response::default()
         .add_submessage(sub_msg)
-        .add_attribute("action", "claim_stake_reward")
+        .add_attribute("action", "claim_stake_rewards")
         .add_attribute("share_id", share_id.to_string()))
 }
 

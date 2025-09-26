@@ -36,6 +36,13 @@ pub enum ExecuteMsg {
         granted_principal: Uint128,
     },
 
+    Share {
+        share_id: u32,
+        new_owner: String,
+        granted_rewards: Uint128,
+        granted_principal: Uint128,
+    },
+
     AddShareholderWithTime {
         owner: String,
         share_id: u32,
