@@ -32,6 +32,10 @@ pub fn instantiate(
         return Err(ContractError::InvalidInput);
     }
 
+    if msg.apy.u128() != 0 && msg.providers.len() == 0 {
+        return Err(ContractError::InvalidInput);
+    }
+
     let config = Config {
         lock_period: msg.lock_period,
         cliff_period: msg.cliff_period,

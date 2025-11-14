@@ -382,10 +382,9 @@ fn execute_share(
         }
     );
 
-    let access_control = get_access_control();
-    access_control.only_admin(deps.storage, &info.sender)?;
     let config = CONFIG.load(deps.storage)?;
     if config.enable_shareholder_whitelist {
+        let access_control = get_access_control();
         access_control.only_shareholder(deps.storage, &new_owner_addr)?;
     }
 
